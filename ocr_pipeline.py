@@ -1,16 +1,28 @@
-import cv2
-import easyocr
+import os
 import re
 import glob
 import random
+import cv2
+import easyocr
 from ultralytics import YOLO
 
-# 1. Load trained YOLOv8 model
-model_path = r"runs/detect/train-3/weights/best.pt"
-model = YOLO(model_path)
+# 1. Resolve absolute paths dynamically
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "runs", "detect", "train-3", "weights", "best.pt")
 
-# 2. Initialize EasyOCR Reader
+# Fallback path if custom trained model is in root or default weights are used
+if not os.path.exists(MODEL_PATH):
+    MODEL_PATH = os.path.join(BASE_DIR, "best.pt")
+    if not os.path.exists(MODEL_PATH):
+        MODEL_PATH = os.path.join(BASE_DIR, "yolov8n.pt")
+
+print(f"📦 Loading YOLOv8 model from: {MODEL_PATH}")
+model = YOLO(MODEL_PATH)
+
+# 2. Initialize EasyOCR Reader globally once to save memory
+print("👁️ Initializing EasyOCR Reader...")
 reader = easyocr.Reader(['en'], gpu=False)
+
 
 def preprocess_roi(roi):
     """
@@ -32,9 +44,10 @@ def preprocess_roi(roi):
 
     return enhanced
 
+
 def clean_extracted_text(label, text):
     """
-    Clean and format OCR output using Regex.
+    Clean and format OCR output using Regex and privacy masking.
     """
     text = text.strip()
 
@@ -57,44 +70,52 @@ def clean_extracted_text(label, text):
             return "Female"
         return text
 
-    elif label == "aadhaar_no":
-        # Extract exactly digits and format into standard 4-digit groups
+    elif label in ["aadhaar_no", "aadhaar_number", "id_number"]:
+        # Extract digits and format into standard masked structure for privacy
         digits = re.sub(r'\D', '', text)
         if len(digits) >= 12:
-            digits = digits[:12]  # Take first 12 digits if OCR over-read extra noise
-            return f"{digits[:4]} {digits[4:8]} {digits[8:]}"
-        return digits
+            digits = digits[:12]
+            return f"XXXX XXXX {digits[8:]}"
+        elif len(digits) >= 4:
+            return f"XXXX XXXX {digits[-4:]}"
+        return "XXXX XXXX XXXX"
 
     return text
 
+
 def process_document(image_path):
+    """
+    Runs YOLOv8 detection and EasyOCR pipeline on the given image path.
+    Returns a dictionary of cleaned key-value fields.
+    """
     img = cv2.imread(image_path)
     if img is None:
         print(f"❌ Error: Could not load image at {image_path}")
-        return
+        return {}
 
     # Run YOLOv8 detection
     results = model(image_path)[0]
     extracted_data = {}
 
-    print("\n" + "="*40)
+    print("\n" + "=" * 40)
     print("🔍 EXTRACTING FIELD DATA VIA ENHANCED OCR")
-    print("="*40)
+    print("=" * 40)
 
     for box in results.boxes:
         cls_id = int(box.cls[0])
         label = model.names[cls_id]
 
-        if label == "aadhaar":
+        # Skip full document bounding box if detected
+        if label.lower() in ["aadhaar", "document", "card"]:
             continue
 
-        # Get coordinates
+        # Bounding box coordinates
         x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-        # Crop ROI
+        # Crop ROI (Region of Interest)
         cropped_roi = img[y1:y2, x1:x2]
 
-        # Apply image preprocessing to crisp up blurry/noisy text
+        # Apply image preprocessing
         processed_roi = preprocess_roi(cropped_roi)
 
         # Pass clean ROI to EasyOCR
@@ -103,23 +124,32 @@ def process_document(image_path):
 
         # Clean text
         cleaned_text = clean_extracted_text(label, raw_text)
-        
-        # Only save non-empty extractions
+
+        # Save extracted data
         if cleaned_text:
             extracted_data[label] = cleaned_text
+
+            # Provide alias mapping for React frontend UI
+            if label in ["aadhaar_no", "aadhaar_number"]:
+                extracted_data["id_number"] = cleaned_text
+
             print(f"📌 {label.upper():<12}: {cleaned_text}")
 
-    print("="*40 + "\n")
+    print("=" * 40 + "\n")
     return extracted_data
 
-if __name__ == "__main__":
-    # Test on your test images folder
-    test_folder = r"E:\aadhaar_ocr_project\ocr dataset\Document from Madhav Kalra~\indian doc ocr\dataset\aadhar.v5i.yolov8\test\images\7d34ed90-7880-4787-9200-4379ba932d5c_jpg.rf.d391e90e0a77fdf8d6e17ebedc2e4b4d.jpg"
-    images = glob.glob(test_folder)
 
-    if images:
-        sample_image = random.choice(images)
-        print(f"🖼️ Running test on: {sample_image}")
+if __name__ == "__main__":
+    # Test on dataset or local image
+    search_pattern = os.path.join(BASE_DIR, "dataset", "**", "*.jpg")
+    test_images = glob.glob(search_pattern, recursive=True)
+
+    if not test_images:
+        test_images = glob.glob(os.path.join(BASE_DIR, "*.jpg")) + glob.glob(os.path.join(BASE_DIR, "*.png"))
+
+    if test_images:
+        sample_image = random.choice(test_images)
+        print(f"🖼️ Running standalone test on: {sample_image}")
         process_document(sample_image)
     else:
         print("❌ No test images found!")

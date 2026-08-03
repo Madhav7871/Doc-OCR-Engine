@@ -1,122 +1,130 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [extractedData, setExtractedData] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Handle image selection and create a preview
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setExtractedData(null);
+      setError(null);
+    }
+  };
+
+  // Send the image to your backend API
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setError("Please select an image first.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("document", selectedFile);
+
+    try {
+      // NOTE: Replace this URL with your actual backend API endpoint
+      // Example: http://localhost:5000/api/extract
+      const response = await fetch("http://localhost:8000/api/ocr", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to process document");
+      }
+
+      const data = await response.json();
+      setExtractedData(data);
+    } catch (err) {
+      setError(
+        "Error processing image. Make sure your backend API is running.",
+      );
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-container">
+      <header>
+        <h1>DocuLens OCR Engine</h1>
+        <p>Upload an identity document for real-time data extraction.</p>
+      </header>
 
-      <div className="ticks"></div>
+      <main className="main-content">
+        {/* Upload Section */}
+        <div className="upload-card">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            id="file-upload"
+          />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {previewUrl && (
+            <div className="image-preview">
+              <img src={previewUrl} alt="Document Preview" />
+            </div>
+          )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          <button
+            onClick={handleUpload}
+            disabled={!selectedFile || loading}
+            className="upload-btn"
+          >
+            {loading ? "Processing Document..." : "Run OCR Pipeline"}
+          </button>
+
+          {error && <p className="error-text">{error}</p>}
+        </div>
+
+        {/* Results Section */}
+        {extractedData && (
+          <div className="results-card">
+            <h2>Extraction Results</h2>
+            <div className="result-grid">
+              <div className="data-field">
+                <span className="label">Name:</span>
+                <span className="value">
+                  {extractedData.name || "Not detected"}
+                </span>
+              </div>
+              <div className="data-field">
+                <span className="label">DOB:</span>
+                <span className="value">
+                  {extractedData.dob || "Not detected"}
+                </span>
+              </div>
+              <div className="data-field">
+                <span className="label">Gender:</span>
+                <span className="value">
+                  {extractedData.gender || "Not detected"}
+                </span>
+              </div>
+              <div className="data-field highlight">
+                <span className="label">ID Number:</span>
+                <span className="value">
+                  {extractedData.id_number || "XXXX-XXXX-XXXX"}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
