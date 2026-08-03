@@ -23,7 +23,6 @@ model = YOLO(MODEL_PATH)
 print("👁️ Initializing EasyOCR Reader...")
 reader = easyocr.Reader(['en'], gpu=False)
 
-
 def preprocess_roi(roi):
     """
     Preprocess cropped image regions to improve OCR clarity on low-res/blurry text.
@@ -44,10 +43,9 @@ def preprocess_roi(roi):
 
     return enhanced
 
-
 def clean_extracted_text(label, text):
     """
-    Clean and format OCR output using Regex and privacy masking.
+    Clean and format OCR output using Regex.
     """
     text = text.strip()
 
@@ -71,17 +69,15 @@ def clean_extracted_text(label, text):
         return text
 
     elif label in ["aadhaar_no", "aadhaar_number", "id_number"]:
-        # Extract digits and format into standard masked structure for privacy
+        # Extract digits and format into standard 4-digit groups (FULL NUMBER)
         digits = re.sub(r'\D', '', text)
         if len(digits) >= 12:
             digits = digits[:12]
-            return f"XXXX XXXX {digits[8:]}"
-        elif len(digits) >= 4:
-            return f"XXXX XXXX {digits[-4:]}"
-        return "XXXX XXXX XXXX"
+            # Send the complete number to the frontend like: 1234 5678 9012
+            return f"{digits[:4]} {digits[4:8]} {digits[8:]}"
+        return digits
 
     return text
-
 
 def process_document(image_path):
     """
@@ -137,7 +133,6 @@ def process_document(image_path):
 
     print("=" * 40 + "\n")
     return extracted_data
-
 
 if __name__ == "__main__":
     # Test on dataset or local image
