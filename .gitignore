@@ -1,0 +1,23 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Dataset images & temporary files
+dataset/
+ocr dataset/
+*.jpg
+*.jpeg
+*.png
+
+# Large YOLO weights and runs (Optional: keep if you don't want to upload large run folders)
+runs/
+*.pt
+
+# IDE settings
+.vscode/
+.idea/
