@@ -216,10 +216,8 @@ body {
   flex: 1;
   max-width: 100%;
   margin: 0 auto;
-
   /* Pushed down to account for the fixed navbar */
   padding: calc(3rem + 70px) 4% 3rem 4%;
-
   width: 100%;
   box-sizing: border-box;
 }
@@ -379,23 +377,38 @@ body {
   justify-content: flex-end;
 }
 
+/* --- Polished Secondary Button (Replace Image) --- */
 .secondary-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: var(--bg-color);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-btn svg {
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
 
 .secondary-btn:hover {
-  background: var(--border-hover);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.secondary-btn:hover svg {
+  opacity: 1;
 }
 
 /* --- Primary Button --- */
