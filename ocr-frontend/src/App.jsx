@@ -346,9 +346,7 @@ function App() {
           <div className="footer-content">
             <div className="footer-left">
               <span className="footer-brand">DocuLens</span>
-              <p className="footer-copyright">
-                © 2026 Madhav Kalra. All rights reserved.
-              </p>
+              <p className="footer-copyright">© 2026 All rights reserved.</p>
             </div>
             <div className="footer-links">
               <a href="#">Privacy Policy</a>
