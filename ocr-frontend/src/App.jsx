@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
@@ -8,6 +8,29 @@ function App() {
   const [extractedData, setExtractedData] = useState(null);
   const [error, setError] = useState(null);
   const [showFullId, setShowFullId] = useState(false);
+
+  // State for the smart scrolling navbar
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Hook to handle scroll direction and hide/show navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Hide if scrolling down and past the top area (80px), else show
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setIsNavVisible(false);
+      } else {
+        setIsNavVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -68,8 +91,8 @@ function App() {
       </div>
 
       <div className="page-wrapper">
-        {/* --- Professional Application Navbar --- */}
-        <nav className="app-navbar">
+        {/* --- Professional Application Navbar (Smart Scroll) --- */}
+        <nav className={`app-navbar ${isNavVisible ? "" : "nav-hidden"}`}>
           <div className="nav-container">
             <div className="nav-brand">
               <svg
