@@ -62,143 +62,278 @@ function App() {
 
   return (
     <>
-      {/* Top Header Navbar */}
-      <nav className="navbar">
-        <div className="nav-brand">
-          <span className="brand-icon"></span>
-          <span>DocuLens AI</span>
-        </div>
-        <div className="nav-badge">v1.0 Ready</div>
-      </nav>
+      {/* Floating Dots & Grid Background Layer */}
+      <div className="ambient-background">
+        <div className="floating-dots"></div>
+      </div>
 
-      <div className="app-container">
-        {/* Hero Section */}
-        <header className="hero-section">
-          <div className="pill-tag">
-            <span>✨ Real-Time Document OCR</span>
-          </div>
-          <h1 className="hero-title">
-            Extract Data <br />
-            <span className="gradient-text">Instantly.</span>
-          </h1>
-          <p className="hero-subtitle">
-            Upload identity documents for high-precision computer vision
-            detection and extraction.
-          </p>
-        </header>
-
-        {/* Upload Card */}
-        <div className="glass-card">
-          <div className="file-upload-wrapper">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              id="file-upload"
-            />
-          </div>
-
-          {previewUrl && (
-            <div className="image-preview-container">
-              <img
-                src={previewUrl}
-                alt="Document Preview"
-                className="image-preview"
-              />
+      <div className="page-wrapper">
+        {/* --- Professional Application Navbar --- */}
+        <nav className="app-navbar">
+          <div className="nav-container">
+            <div className="nav-brand">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="brand-logo"
+              >
+                <path d="M2 12h4l2-9 5 18 3-10h6" />
+              </svg>
+              <span>
+                DocuLens <span className="brand-highlight">AI</span>
+              </span>
             </div>
-          )}
+            <div className="nav-links">
+              <a href="#" className="nav-link">
+                Documentation
+              </a>
+              <a href="#" className="nav-link">
+                API Reference
+              </a>
+              <a href="#" className="nav-link">
+                GitHub
+              </a>
+              <button className="nav-cta">Dashboard</button>
+            </div>
+          </div>
+        </nav>
 
-          <button
-            onClick={handleUpload}
-            disabled={!selectedFile || loading}
-            className="primary-btn"
-          >
-            {loading ? "Processing Document..." : "Run OCR Pipeline →"}
-          </button>
+        {/* --- Main Application Workspace --- */}
+        <main className="app-main">
+          <header className="workspace-header">
+            <h1 className="workspace-title">Document Extraction Engine</h1>
+            <p className="workspace-subtitle">
+              Upload government-issued identity documents to securely extract
+              structured data using our YOLOv8 vision pipeline.
+            </p>
+          </header>
 
-          {error && <p className="error-text">{error}</p>}
-        </div>
-
-        {/* Results Card */}
-        {extractedData && (
-          <div className="glass-card results-card">
-            <h2>
-              <span>⚡</span> Extraction Results
-            </h2>
-
-            <div className="result-grid">
-              <div className="result-row">
-                <span className="result-label">Name</span>
-                <span className="result-value">
-                  {extractedData.name || "Not detected"}
-                </span>
+          <div className="workspace-grid">
+            {/* Left Column: Upload Panel */}
+            <div className="panel upload-panel">
+              <div className="panel-header">
+                <h2>1. Upload Document</h2>
               </div>
 
-              <div className="result-row">
-                <span className="result-label">DOB</span>
-                <span className="result-value">
-                  {extractedData.dob || "Not detected"}
-                </span>
+              {!previewUrl ? (
+                <div className="file-upload-wrapper">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    id="file-upload"
+                    className="hidden-file-input"
+                  />
+                  <label htmlFor="file-upload" className="upload-placeholder">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="36"
+                      height="36"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <span className="upload-text">
+                      Click to browse or drag and drop
+                    </span>
+                    <span className="upload-hint">
+                      Supports JPEG, PNG up to 5MB
+                    </span>
+                    <span className="browse-btn">Choose File</span>
+                  </label>
+                </div>
+              ) : (
+                <div className="preview-state">
+                  <div className="image-preview-container">
+                    <img
+                      src={previewUrl}
+                      alt="Document Preview"
+                      className="image-preview"
+                    />
+                  </div>
+                  <div className="preview-actions">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      id="file-upload-change"
+                      className="hidden-file-input"
+                    />
+                    <label
+                      htmlFor="file-upload-change"
+                      className="secondary-btn"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                      </svg>
+                      Change Document
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={handleUpload}
+                disabled={!selectedFile || loading}
+                className="primary-btn"
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner"></span> Processing Pipeline...
+                  </>
+                ) : (
+                  "Run OCR Engine"
+                )}
+              </button>
+
+              {error && <div className="error-banner">{error}</div>}
+            </div>
+
+            {/* Right Column: Results Panel */}
+            <div className="panel results-panel">
+              <div className="panel-header">
+                <h2>2. Extracted Data</h2>
+                {extractedData && (
+                  <span className="status-badge success">Success</span>
+                )}
               </div>
 
-              <div className="result-row">
-                <span className="result-label">Gender</span>
-                <span className="result-value">
-                  {extractedData.gender || "Not detected"}
-                </span>
-              </div>
-
-              <div className="result-row">
-                <span className="result-label">ID Number</span>
-                <span className="result-value">
-                  {getDisplayedId(
-                    extractedData.id_number || extractedData.aadhaar_no,
-                    showFullId,
-                  )}
-
-                  <button
-                    type="button"
-                    className="toggle-btn"
-                    onClick={() => setShowFullId(!showFullId)}
-                    title={showFullId ? "Hide ID Number" : "Show ID Number"}
+              {!extractedData ? (
+                <div className="empty-state">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    {showFullId ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="3" y1="9" x2="21" y2="9" />
+                    <line x1="9" y1="21" x2="9" y2="9" />
+                  </svg>
+                  <p>Run the engine to view extracted JSON data here.</p>
+                </div>
+              ) : (
+                <div className="result-grid">
+                  <div className="result-row">
+                    <span className="result-label">Full Name</span>
+                    <span className="result-value">
+                      {extractedData.name || "Not detected"}
+                    </span>
+                  </div>
+
+                  <div className="result-row">
+                    <span className="result-label">Date of Birth</span>
+                    <span className="result-value">
+                      {extractedData.dob || "Not detected"}
+                    </span>
+                  </div>
+
+                  <div className="result-row">
+                    <span className="result-label">Gender</span>
+                    <span className="result-value">
+                      {extractedData.gender || "Not detected"}
+                    </span>
+                  </div>
+
+                  <div className="result-row highlight-row">
+                    <span className="result-label">Gov ID Number</span>
+                    <span className="result-value id-value">
+                      {getDisplayedId(
+                        extractedData.id_number || extractedData.aadhaar_no,
+                        showFullId,
+                      )}
+
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => setShowFullId(!showFullId)}
+                        title={showFullId ? "Mask Data" : "Reveal Data"}
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
-                          clipRule="evenodd"
-                        />
-                        <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M.458 10C1.274 5.943 5.065 3 10 3s8.726 2.943 9.542 7c-.816 4.057-4.607 7-9.542 7S1.274 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                </span>
-              </div>
+                        {showFullId ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                            <line x1="1" y1="1" x2="23" y2="23" />
+                          </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        )}
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </main>
+
+        {/* --- Professional Footer --- */}
+        <footer className="app-footer">
+          <div className="footer-content">
+            <div className="footer-left">
+              <span className="footer-brand">DocuLens</span>
+              <p className="footer-copyright">
+                © 2026 Madhav Kalra. All rights reserved.
+              </p>
+            </div>
+            <div className="footer-links">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
+              <a href="#">System Status</a>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );
